@@ -1,4 +1,7 @@
-def get_todos(filepath="todos.txt"):
+FILEPATH = "todos.txt"
+
+
+def get_todos(filepath=FILEPATH):
     """
     Read and extract the to-do items from a text file
 
@@ -11,7 +14,7 @@ def get_todos(filepath="todos.txt"):
     return todos
 
 
-def write_todos(todos_param, filepath="todos.txt"):
+def write_todos(todos_param, filepath=FILEPATH):
     """
     Write in a text file the list of to-do items
 
