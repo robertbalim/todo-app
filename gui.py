@@ -5,11 +5,16 @@ label = Psg.Text("Type in a todo")
 input_text = Psg.InputText(tooltip="Enter todo here", key="todo")
 button = Psg.Button("Add", key="Add")
 listbox = Psg.Listbox(values=get_todos(), key="todos",
-                      enable_events=True, size=[45, 10])
+                      enable_events=True, size=(45, 10))
 edit_button = Psg.Button("Edit", key="Edit")
+complete_button = Psg.Button("Complete")
+close_button = Psg.Button("Close")
 
 window = Psg.Window("My To-Do App",
-                    layout=[[label], [input_text, button], [listbox, edit_button]],
+                    layout=[[label],
+                            [input_text, button],
+                            [listbox, edit_button, complete_button],
+                            [close_button]],
                     font=("Helvetica", 20))
 
 while True:
@@ -35,8 +40,17 @@ while True:
             write_todos(todos)
             window["todos"].update(values=todos)
             input_text.Update(value="")
+        case "Complete":
+            todo_to_complete = values["todos"][0]
+            todos = get_todos()
+            todos.remove(todo_to_complete)
+            write_todos(todos)
+            window["todos"].update(values=todos)
+            window["todo"].update(value="")
         case "todos":
             window["todo"].update(value=values['todos'][0])
+        case "Close":
+            break
         case Psg.WIN_CLOSED:
             break
 
