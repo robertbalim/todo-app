@@ -1,71 +1,43 @@
-from functions import get_todos, write_todos
 import PySimpleGUI as Psg
-import time
+from functions import get_todos, write_todos
 
-# Psg.theme_previewer()
-Psg.theme("BluePurple")
-clock = Psg.Text("", key="clock")
-label = Psg.Text("Type in a todo")
-input_text = Psg.InputText(tooltip="Enter todo here", key="todo")
-button = Psg.Button("Add", key="Add")
+Psg.theme("DarkBlue3")
+Psg.set_options(font=("Gill Sans MT", 12))
 
-listbox = Psg.Listbox(values=get_todos(), key="todos",
-                      enable_events=True, size=(45, 10))
-edit_button = Psg.Button("Edit", key="Edit")
-complete_button = Psg.Button("Complete")
-close_button = Psg.Button("Close")
+todos = get_todos()
 
-window = Psg.Window("My To-Do App",
-                    layout=[[clock], [label],
-                            [input_text, button],
-                            [listbox, edit_button, complete_button],
-                            [close_button]],
-                    font=("Helvetica", 20))
+label = Psg.Text("Type in your todos")
+input_box = Psg.InputText(size=(50, 40), tooltip="Enter todo here", enable_events=True, key="-INPUT-")
+button_close = Psg.Button("Exit", enable_events=True)
+button_add = Psg.Button("Add", enable_events=True, size=(None, 1))
+button_remove = Psg.Button("Remove", enable_events=True, size=(None, 1))
+listbox_todo = Psg.Listbox(todos, size=(50, 10), enable_events=True, no_scrollbar=True, key="-LIST_TODO-")
+
+window = Psg.Window("My To-Do App", size=(650, 400), icon="icon/todo.ico", enable_close_attempted_event=True,
+                    layout=[[label],
+                            [input_box, button_add],
+                            [listbox_todo, button_remove],
+                            [button_close]])
 
 while True:
-    event, values = window.read(timeout=200)
-    window["clock"].update(value=time.strftime("%A %m/%d/%Y %I:%M:%S %p"))
-    match event:
-        case "Add":
-            if values["todo"] == "":
-                Psg.popup("Please enter the todo first", font=("Helvetica", 20))
-            else:
-                todos = get_todos()
-                new_todo = values["todo"] + "\n"
-                todos.append(new_todo)
-                write_todos(todos)
-                window["todos"].update(values=todos)
-                input_text.Update(value="")
-        case "Edit":
-            try:
-                todo_to_edit = values["todos"][0]
-                new_todo = values["todo"]
+    event, values = window.read()
 
-                todos = get_todos()
-                i = todos.index(todo_to_edit)
-                todos[i] = new_todo + "\n"
+    if event == "Add":
+        todo = values["-INPUT-"].strip().title() + "\n"
+        todos.append(todo)
+        window["-LIST_TODO-"].update(todos)
+        window["-INPUT-"].update("")
 
-                write_todos(todos)
-                window["todos"].update(values=todos)
-                input_text.Update(value="")
-            except IndexError:
-                Psg.popup("Please select the todo to edit", font=("Helvetica", 20))
-        case "Complete":
-            try:
-                todo_to_complete = values["todos"][0]
-                todos = get_todos()
-                todos.remove(todo_to_complete)
-                write_todos(todos)
-                window["todos"].update(values=todos)
-                window["todo"].update(value="")
-            except IndexError:
-                Psg.popup("Please select the todo to complete", font=("Helvetica", 20))
-        case "todos":
-            window["todo"].update(value=values['todos'][0])
-        case "Close":
-            break
-        case Psg.WIN_CLOSED:
-            break
+        write_todos(todos)
+    elif event == "Remove":
+        index = listbox_todo.get_indexes()[0]
+        todos.pop(index)
+        window["-LIST_TODO-"].update(todos)
 
+        write_todos(todos)
+    elif event == Psg.WINDOW_CLOSE_ATTEMPTED_EVENT:
+        break
+    elif event == Psg.WIN_CLOSED or event == "Exit":
+        break
 
 window.close()

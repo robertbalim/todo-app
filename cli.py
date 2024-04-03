@@ -1,66 +1,77 @@
-# from functions import get_todos, write_todos
-import functions
+from functions import get_todos, write_todos
 import time
 
-now = time.strftime("%A %m/%d/%Y %I:%M:%S %p")
-print("It is", now)
+
+now = time.strftime("%B %d, %Y %I:%M:%S %p")
+print("Today's date:", now)
+
 
 while True:
-    user_input = input("Type Add, Show, Edit, Complete or Exit: ")
-    user_input = user_input.strip().capitalize()
+    user_select = input("Select Add, Show, Edit, Complete, Exit: ")
+    user_select = user_select.title()
 
-    if user_input.startswith("Add") or user_input.startswith("New"):
-        todos = functions.get_todos()
+    if user_select.startswith("Add"):
+        todo = user_select[4:]
 
-        todo = user_input[4:]
-        todos.append(todo.capitalize() + "\n")
+        todos = get_todos()
 
-        functions.write_todos(todos)
+        todos.append(todo.title() + "\n")
 
-    elif user_input.startswith("Edit"):
-        try:
-            todos = functions.get_todos()
+        write_todos(todos)
+    elif user_select.startswith('Show') or user_select.startswith('Display'):
+        todos = get_todos()
 
-            # for index, todo in enumerate(todos):
-            #     print(f"{index + 1}--{todo}", end="")
+        # ********** LONG METHOD **********
+        # new_todos = []
+        # for todo in todos:
+        #     new_todos.append(todo.strip("\n"))
 
-            edit_item = int(user_input[5:])
-            change_item = input("Enter the todo replacement: ")
-            todos[edit_item - 1] = change_item.capitalize() + "\n"
+        # ********** SHORT METHOD USING LIST COMPREHENSION **********
+        new_todos = [todo.strip('\n') for todo in todos]
 
-            functions.write_todos(todos)
-
-            print("Item change successfully!")
-        except ValueError:
-            print("Your command is not valid")
-    elif user_input.startswith("Show"):
-        todos = functions.get_todos()
-
-        if len(todos) <= 0:
-            print("There is no record to show!")
+        if len(new_todos) > 0:
+            for i, item in enumerate(new_todos):
+                print(f"{i+1}-{item}")
         else:
-            for index, todo in enumerate(todos):
-                print(f"{index + 1}--{todo}", end="")
-    elif user_input.startswith("Complete"):
+            print("No todos found. Please add new todos")
+    elif user_select.startswith('Edit'):
         try:
-            todos = functions.get_todos()
+            todos = get_todos()
 
-            done_todo = int(user_input[9:])
-            done_todo = todos.pop(done_todo - 1)
+            number = int(user_select[5:])
+            item_change = input("Change item to: ").title()
 
-            functions.write_todos(todos)
+            if number > len(todos):
+                print("Invalid item number. Not exist!")
+            else:
+                number = number - 1
+                todos[number] = item_change + "\n"
 
-            print("Todo has been completed!", done_todo)
+                write_todos(todos)
+        except ValueError:
+            print("Invalid command there are no such number")
+            continue
+    elif user_select.startswith('Complete'):
+        try:
+            todos = get_todos()
+
+            new_todos = [item.strip('\n') for item in todos]
+
+            for i, item in enumerate(new_todos):
+                print(f"{i+1}-{item}")
+
+            number = int(user_select[9:])
+            remove_item = todos.pop(number-1)
+
+            write_todos(todos)
+
+            print(f"Todos *{remove_item}* has been completed")
         except IndexError:
-            print("There is no number with that item")
-    elif user_input.startswith("Clear"):
-        if input("Are you sure to delete all records?").capitalize() == "Yes":
-            file = open('todos.txt', 'w')
-            file.close()
-        print("All records has been deleted!")
-    elif user_input.startswith("Exit"):
+            print("Invalid value. There is no such value")
+            continue
+    elif user_select.startswith('Exit'):
         break
     else:
-        print("Invalid command!")
+        print("Hey, you entered an unknown command")
 
-print("Bye!")
+print("Thank you and Bye!")
